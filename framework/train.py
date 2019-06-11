@@ -47,8 +47,8 @@ def train_and_test(train_spec, test_spec, n_epoch):
 
         # Test
         saver.restore(sess, 'tmp/model.ckpt')
-
-        # Get parameter from tf variables
+        '''
+         # Get parameter from tf variables
         default_graph = tf.get_default_graph()
         conv1_kernel = default_graph.get_tensor_by_name('model/conv1/kernel:0').eval()
         conv1_bias = default_graph.get_tensor_by_name('model/conv1/bias:0').eval()
@@ -64,7 +64,7 @@ def train_and_test(train_spec, test_spec, n_epoch):
         np.save("conv2_bias", conv2_bias)
         np.save("conv3_kernel", conv3_kernel)
         np.save("conv3_bias", conv3_bias)
-        
+        '''
         sess.run(test_spec['iterator_init_op'])
         test_loss, test_accuracy = sess.run([test_spec['loss_op'], test_spec['psnr_op']])
         print('------------------------------------')

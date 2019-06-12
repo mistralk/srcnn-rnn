@@ -14,6 +14,7 @@
 * TensorFlow 1.12 (could not use in 1.12)
 * NumPy
 * imageio
+* Pillow
 
 ## Assignment detail
 * 32x32x1 input (random cropped from original images)

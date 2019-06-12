@@ -11,14 +11,6 @@ from framework.train import train_and_test
 # Ignore warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-
-def test_Set5():
-    set5_paths = load_images('SR_dataset/Set5')
-    set5_inputs = input_dataset(set5_paths, len(set5_paths))
-    set5_spec = model(set5_inputs, training=False)
-    reuse_model('tmp/model.ckpt', set5_spec)
-
-
 if __name__ == '__main__':
     # TODO: command line interface
     

@@ -28,7 +28,6 @@ def train_and_test(train_spec, test_spec, n_epoch):
         
         best_accuracy = -99999.0
 
-        
         for item in tf.trainable_variables():
             print(item)
 
@@ -37,26 +36,20 @@ def train_and_test(train_spec, test_spec, n_epoch):
             sess.run(train_spec['iterator_init_op'])
 
             if epoch % 10 == 0:
-                _, loss, accuracy, summary = sess.run([train_op, loss_op, psnr_op, summary_op])
+                _, summary = sess.run([train_op, summary_op])
                 file_writer.add_summary(summary, global_step=epoch)
     
             else:
-                _, loss, accuracy = sess.run([train_op, loss_op, psnr_op])
-            
-            if best_accuracy < accuracy:
-                best_accuracy = accuracy
+                sess.run(train_op)
+
+            # Validation
+            sess.run(test_spec['iterator_init_op'])
+            test_loss, test_accuracy = sess.run([test_spec['loss_op'], test_spec['psnr_op']])
+
+            if best_accuracy < test_accuracy:
+                best_accuracy = test_accuracy
                 save_path = saver.save(sess, 'tmp/model.ckpt')
 
-            print('epoch #{} PSNR:{} LOSS:{}'.format(epoch, accuracy, loss))
-
-        # Test
-        saver.restore(sess, 'tmp/model.ckpt')
-
-        sess.run(test_spec['iterator_init_op'])
-        test_loss, test_accuracy = sess.run([test_spec['loss_op'], test_spec['psnr_op']])
-        print('------------------------------------')
-        print('Test set loss: {}'.format(test_loss))
-        print('Test set PSNR: {}'.format(test_accuracy))
-        print('------------------------------------')
+            print('epoch #{} / validset PSNR:{}, LOSS:{}'.format(epoch, test_accuracy, test_loss))
 
     file_writer.close()

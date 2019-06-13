@@ -30,7 +30,7 @@ if __name__ == '__main__':
         ground_truth = np.array(ground_truth)
 
         #recovered = reuse_without_metric(lowres, 'tmp/area5000/model.ckpt')    
-        recovered = reuse_with_metric(lowres, ground_truth, 'tmp/model_b/model.ckpt')
+        recovered = reuse_with_metric(lowres, ground_truth, 'tmp/model_a/model.ckpt')
         recovered = recovered.astype(np.uint8)
 
         _, path_and_file = os.path.splitdrive(image_path)

@@ -49,7 +49,7 @@ def train_and_test(train_spec, test_spec, n_epoch):
 
             print('epoch #{} PSNR:{} LOSS:{}'.format(epoch, accuracy, loss))
 
-        Test
+        # Test
         saver.restore(sess, 'tmp/model.ckpt')
 
         sess.run(test_spec['iterator_init_op'])

@@ -29,14 +29,16 @@ if __name__ == '__main__':
         lowres = np.array(lowres)
         ground_truth = np.array(ground_truth)
 
-        #recovered = reuse_without_metric(lowres, 'tmp/area5000/model.ckpt')    
-        recovered = reuse_with_metric(lowres, ground_truth, 'tmp/model_a/model.ckpt')
-        recovered = recovered.astype(np.uint8)
+        #restored = reuse_without_metric(lowres, 'tmp/model_a/model.ckpt')
+        #print(image_path)
+        restored, accuracy = reuse_with_metric(lowres, ground_truth, 'tmp/model_a/model.ckpt')
+        restored = restored.astype(np.uint8)
+        print(image_path, 'PSNR: {}'.format(accuracy))
 
         _, path_and_file = os.path.splitdrive(image_path)
         path, name = os.path.split(path_and_file)
         name = os.path.splitext(name)[0]
 
-        imageio.imwrite(name + '_sr.png', recovered)
-        imageio.imwrite(name + '_lr.png', lowres)
-        imageio.imwrite(name + '_gt.png', ground_truth)
+        imageio.imwrite('output/model_a/' + name + '_sr.png', restored)
+        imageio.imwrite('output/model_a/' + name + '_lr.png', lowres)
+        imageio.imwrite('output/model_a/' + name + '_gt.png', ground_truth)

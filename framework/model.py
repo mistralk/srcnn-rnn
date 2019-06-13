@@ -137,13 +137,9 @@ def reuse_with_metric(lowres_img, groundtruth_img, ckpt_path):
 
     with tf.Session() as sess:
         saver.restore(sess, ckpt_path)
-        output_var, loss_var, accuracy_var = sess.run([output, loss, psnr], feed_dict={lowres: lowres_img, ground_truth: groundtruth_img})
-        print('------------------------------------')
-        print('loss: {}'.format(loss_var))
-        print('PSNR: {}'.format(accuracy_var))
-        print('------------------------------------')
+        output_var, accuracy_var = sess.run([output, psnr], feed_dict={lowres: lowres_img, ground_truth: groundtruth_img})
 
-        return output_var[0]
+        return output_var[0], accuracy_var
 
 
 def reuse_without_metric(lowres_img, ckpt_path):
@@ -171,7 +167,6 @@ def reuse_without_metric(lowres_img, ckpt_path):
     with tf.Session() as sess:
         saver.restore(sess, ckpt_path)
         output_var = sess.run(output, feed_dict={lowres: lowres_img})
-        print('------------------------------------')
 
         return output_var[0]
 

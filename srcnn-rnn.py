@@ -5,16 +5,13 @@ from framework.util import load_images
 from framework.util import split_train_test
 from framework.input import input_dataset
 from framework.model import model
-from framework.model import reuse_model
 from framework.train import train_and_test
 
 # Ignore warnings
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-if __name__ == '__main__':
-    # TODO: command line interface
-    
-    n_epoch = 1000
+if __name__ == '__main__':    
+    n_epoch = 5000
     batch_size = 128
     
     # Create two dataset (input data pipeline with image paths)

@@ -15,7 +15,7 @@ def cnn_layers(x_t, h_prev):
                             filters=32,
                             kernel_size=[3,3],
                             padding='SAME',
-                            activation=tf.nn.relu)
+                            activation=tf.nn.relu,)
         
         # input z_t: 32x32x32
         # conv patch: 3x3x32x32
@@ -66,6 +66,8 @@ def model(inputs, training=False):
     lowres = inputs['lowres']
     ground_truth = inputs['ground_truth']
 
+    #lowres = tf.image.resize_images(lowres, [32, 32], method=tf.image.ResizeMethod.BICUBIC)
+
     y0 = lowres
     h0 = tf.zeros([tf.shape(lowres)[0], 32, 32, 32])
 
@@ -80,7 +82,7 @@ def model(inputs, training=False):
     psnr = tf.reduce_mean(tf.image.psnr(output, ground_truth, 1.0))
 
     if training == True:
-        optimizer = tf.train.AdamOptimizer(learning_rate=0.003)
+        optimizer = tf.train.AdamOptimizer(learning_rate=0.0001)
         training_op = optimizer.minimize(loss)
 
         with tf.name_scope('accuracy'):
@@ -105,24 +107,22 @@ def model(inputs, training=False):
     return spec
 
 
-def reuse_model(lowres_img, groundtruth_img, ckpt_path):
+def reuse_with_metric(lowres_img, groundtruth_img, ckpt_path):
 
     w = lowres_img.shape[1]
     h = lowres_img.shape[0]
+
     lowres_img = np.asarray([lowres_img])
+    lowres_img = np.reshape(lowres_img, [1, h, w, 1])
     groundtruth_img = np.asarray([groundtruth_img])
+    groundtruth_img = np.reshape(groundtruth_img, [1, h, w, 1])
 
     lowres = tf.placeholder(tf.float32, shape=[1, h, w, 1])
     ground_truth = tf.placeholder(tf.float32, shape=[1, h, w, 1])
 
-    lowres_img = np.reshape(lowres_img, [1, h, w, 1])
-    groundtruth_img = np.reshape(groundtruth_img, [1, h, w, 1])
-
     y0 = lowres
     h0 = tf.zeros([1, h, w, 32])
 
-    #y3, _ = cnn_layers(x_t=tf.concat([lowres, y0], 3), h_prev=h0)
-    
     y1, h1 = cnn_layers(x_t=tf.concat([lowres, y0], 3), h_prev=h0) # t=1
     y2, h2 = cnn_layers(x_t=tf.concat([lowres, y1], 3), h_prev=h1) # t=2
     y3, h3 = cnn_layers(x_t=tf.concat([lowres, y2], 3), h_prev=h2) # t=3
@@ -141,6 +141,36 @@ def reuse_model(lowres_img, groundtruth_img, ckpt_path):
         print('------------------------------------')
         print('loss: {}'.format(loss_var))
         print('PSNR: {}'.format(accuracy_var))
+        print('------------------------------------')
+
+        return output_var[0]
+
+
+def reuse_without_metric(lowres_img, ckpt_path):
+
+    w = lowres_img.shape[1]
+    h = lowres_img.shape[0]
+
+    lowres_img = np.asarray([lowres_img])
+    lowres_img = np.reshape(lowres_img, [1, h, w, 1])
+
+    lowres = tf.placeholder(tf.float32, shape=[1, h, w, 1])
+
+    y0 = lowres
+    h0 = tf.zeros([1, h, w, 32])
+
+    y1, h1 = cnn_layers(x_t=tf.concat([lowres, y0], 3), h_prev=h0) # t=1
+    y2, h2 = cnn_layers(x_t=tf.concat([lowres, y1], 3), h_prev=h1) # t=2
+    y3, h3 = cnn_layers(x_t=tf.concat([lowres, y2], 3), h_prev=h2) # t=3
+    
+    output = y3
+    output = tf.clip_by_value(output, 0, 255)
+
+    saver = tf.train.Saver()
+
+    with tf.Session() as sess:
+        saver.restore(sess, ckpt_path)
+        output_var = sess.run(output, feed_dict={lowres: lowres_img})
         print('------------------------------------')
 
         return output_var[0]

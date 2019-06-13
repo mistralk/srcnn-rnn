@@ -14,9 +14,10 @@ def preprocess_image(image):
     ground_truth = tf.cast(ground_truth, tf.float32)
     ground_truth /= 255.0
 
-    downsampled = tf.image.resize_images(ground_truth, [16, 16], method=tf.image.ResizeMethod.AREA)
+    #lowres = tf.image.resize_images(ground_truth, [16, 16], method=tf.image.ResizeMethod.NEAREST_NEIGHBOR)
+    downsampled = tf.image.resize_images(ground_truth, [16, 16], method=tf.image.ResizeMethod.BICUBIC)
     lowres = tf.image.resize_images(downsampled, [32, 32], method=tf.image.ResizeMethod.BICUBIC)
-
+    
     ground_truth = tf.clip_by_value(ground_truth, 0.0, 1.0)
     lowres = tf.clip_by_value(lowres, 0.0, 1.0)
 

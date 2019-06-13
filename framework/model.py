@@ -105,33 +105,43 @@ def model(inputs, training=False):
     return spec
 
 
-def reuse_model(image, trained_params):
+def reuse_model(lowres_img, groundtruth_img, ckpt_path):
 
-    lowres = tf.placeholder(tf.float32)
+    w = lowres_img.shape[1]
+    h = lowres_img.shape[0]
+    lowres_img = np.asarray([lowres_img])
+    groundtruth_img = np.asarray([groundtruth_img])
+
+    lowres = tf.placeholder(tf.float32, shape=[1, h, w, 1])
+    ground_truth = tf.placeholder(tf.float32, shape=[1, h, w, 1])
+
+    lowres_img = np.reshape(lowres_img, [1, h, w, 1])
+    groundtruth_img = np.reshape(groundtruth_img, [1, h, w, 1])
 
     y0 = lowres
-    h0 = tf.zeros([tf.shape(lowres)[0], 32, 32, 32])
+    h0 = tf.zeros([1, h, w, 32])
 
+    #y3, _ = cnn_layers(x_t=tf.concat([lowres, y0], 3), h_prev=h0)
+    
     y1, h1 = cnn_layers(x_t=tf.concat([lowres, y0], 3), h_prev=h0) # t=1
     y2, h2 = cnn_layers(x_t=tf.concat([lowres, y1], 3), h_prev=h1) # t=2
     y3, h3 = cnn_layers(x_t=tf.concat([lowres, y2], 3), h_prev=h2) # t=3
-
+    
     output = y3
-    output = tf.clip_by_value(output, 0.0, 1.0)
+    output = tf.clip_by_value(output, 0, 255)
 
     loss = tf.losses.mean_squared_error(labels=ground_truth, predictions=output)
-    psnr = tf.reduce_mean(tf.image.psnr(output, ground_truth, 1.0))
+    psnr = tf.reduce_mean(tf.image.psnr(output, ground_truth, 255))
+
+    saver = tf.train.Saver()
 
     with tf.Session() as sess:
-        output_var, loss_var, accuracy_var = sess.run([output, loss, psnr], feed_dict={lowres: image})
+        saver.restore(sess, ckpt_path)
+        output_var, loss_var, accuracy_var = sess.run([output, loss, psnr], feed_dict={lowres: lowres_img, ground_truth: groundtruth_img})
         print('------------------------------------')
         print('loss: {}'.format(loss_var))
         print('PSNR: {}'.format(accuracy_var))
         print('------------------------------------')
 
-        return output_var
+        return output_var[0]
 
-
-    # TODO: Restore only parameters not model
-    saver = tf.train.Saver()
-    saver.restore(sess, model_path)

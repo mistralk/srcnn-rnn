@@ -14,7 +14,7 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 if __name__ == '__main__':
     # TODO: command line interface
     
-    n_epoch = 100
+    n_epoch = 1000
     batch_size = 128
     
     # Create two dataset (input data pipeline with image paths)

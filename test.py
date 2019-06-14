@@ -39,6 +39,6 @@ if __name__ == '__main__':
         path, name = os.path.split(path_and_file)
         name = os.path.splitext(name)[0]
 
-        imageio.imwrite('output/model_a/' + name + '_sr.png', restored)
-        imageio.imwrite('output/model_a/' + name + '_lr.png', lowres)
-        imageio.imwrite('output/model_a/' + name + '_gt.png', ground_truth)
+        imageio.imwrite('output/' + name + '_sr.png', restored)
+        imageio.imwrite('output/' + name + '_lr.png', lowres)
+        imageio.imwrite('output/' + name + '_gt.png', ground_truth)
